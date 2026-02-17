@@ -8,7 +8,7 @@ body { font-family: Arial; max-width: 1000px; margin: auto; }
 table { width: 100%; border-collapse: collapse; margin-top: 20px; }
 th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
 #formBlock { display: none; margin-top: 20px; }
-input { margin: 5px; }
+input, select { margin: 5px; }
 </style>
 </head>
 <body>
@@ -20,9 +20,27 @@ input { margin: 5px; }
 
 <div id="formBlock">
   <h3>Додати артиста</h3>
+  
+  <!-- Вибір назви -->
   <input id="name" placeholder="Назва">
-  <input id="type" placeholder="Тип (гурт/соло)">
-  <input id="status" placeholder="Статус">
+  
+  <!-- Вибір типу зі списку -->
+  <label for="type">Тип:</label>
+  <select id="type">
+    <option value="соло">Соло</option>
+    <option value="дуо">Дуо</option>
+    <option value="тріо">Тріо</option>
+    <option value="гурт">Гурт</option>
+  </select>
+
+  <!-- Вибір статусу зі списку -->
+  <label for="status">Статус:</label>
+  <select id="status">
+    <option value="трейні">Трейні</option>
+    <option value="предебют">Предебют</option>
+    <option value="активний">Активний</option>
+  </select>
+  
   <input id="members" placeholder="К-сть учасників">
   <input id="channel" placeholder="Канал">
   <button onclick="addData()">Додати</button>
@@ -43,7 +61,7 @@ input { margin: 5px; }
 </table>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLXB6c_jz0jKVfqPCi7pxL0sYPmnbbIdgJWMpdmu0BsuOWCtpyO-8YEaFa93daD9mw/exec";
+const SCRIPT_URL = "ВСТАВ_ТУТ_WEB_APP_URL";
 
 function login() {
   document.getElementById("formBlock").style.display = "block";
