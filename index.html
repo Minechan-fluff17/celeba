@@ -1,109 +1,163 @@
 <!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="UTF-8">
-<title>Celeba artists</title>
-<style>
-body { font-family: Arial; max-width: 1000px; margin: auto; }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-#formBlock { display: none; margin-top: 20px; }
-input { margin: 5px; }
-</style>
-</head>
-<body>
+  <html lang="uk">
+  <head>
+    <meta charset="UTF-8">
+    <title>Celeba artists</title>
+    <style>
+      body { font-family: Arial; max-width: 1000px; margin: auto; position: relative; padding: 20px; }
+      header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+      #formBlock { display: none; margin-top: 20px; border: 1px solid #eee; padding: 15px; border-radius: 5px; background: #f9f9f9; }
+      input { margin: 5px; padding: 5px; }
+      button { padding: 5px 15px; cursor: pointer; }
+    </style>
+  </head>
+  <body>
 
-<h2>Celeba artists</h2>
+    <header>
+      <h2>Celeba artists</h2>
+      <button id="loginBtn" onclick="login()">Увійти</button>
+    </header>
 
-<input type="password" id="password" placeholder="Пароль для редагування">
-<button onclick="login()">Увійти</button>
+    <div id="formBlock">
+      <h3>Додати артиста</h3>
+      
+      <!-- Вибір назви -->
+      <input id="name" placeholder="Назва">
+      
+      <!-- Вибір типу зі списку -->
+      <label for="type">Тип:</label>
+      <select id="type" onchange="handleTypeChange()">
+        <option value="соло">Соло</option>
+        <option value="дуо">Дуо</option>
+        <option value="тріо">Тріо</option>
+        <option value="гурт">Гурт</option>
+      </select>
 
-<div id="formBlock">
-  <h3>Додати артиста</h3>
-  <input id="name" placeholder="Назва">
-  <input id="type" placeholder="Тип (гурт/соло)">
-  <input id="status" placeholder="Статус">
-  <input id="members" placeholder="К-сть учасників">
-  <input id="channel" placeholder="Канал">
-  <button onclick="addData()">Додати</button>
-</div>
+      <!-- Вибір статусу зі списку -->
+      <label for="status">Статус:</label>
+      <select id="status">
+        <option value="трейні">Трейні</option>
+        <option value="предебют">Предебют</option>
+        <option value="активний">Активний</option>
+      </select>
 
-<table id="dataTable">
-<thead>
-<tr>
-<th>Номер</th>
-<th>Назва</th>
-<th>Тип</th>
-<th>Статус</th>
-<th>К-сть учасників</th>
-<th>Канал</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+      <!-- Кількість учасників, яка буде приховуватися для "соло" -->
+      <div id="membersBlock">
+        <input id="members" placeholder="К-сть учасників">
+      </div>
+      
+      <input id="channel" placeholder="Канал">
+      <button onclick="addData()">Додати</button>
+    </div>
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLXB6c_jz0jKVfqPCi7pxL0sYPmnbbIdgJWMpdmu0BsuOWCtpyO-8YEaFa93daD9mw/exec";
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Номер</th>
+          <th>Назва</th>
+          <th>Тип</th>
+          <th>Статус</th>
+          <th>К-сть учасників</th>
+          <th>Канал</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-function login() {
-  document.getElementById("formBlock").style.display = "block";
-}
+    <script>
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLXB6c_jz0jKVfqPCi7pxL0sYPmnbbIdgJWMpdmu0BsuOWCtpyO-8YEaFa93daD9mw/exec";
+      let userPassword = "";
 
-async function loadData() {
-  const response = await fetch(SCRIPT_URL);
-  const data = await response.json();
-  
-  const tableBody = document.querySelector("#dataTable tbody");
-  tableBody.innerHTML = "";
-
-  data.slice(1).forEach(row => {
-    const tr = document.createElement("tr");
-
-    row.forEach((cell, index) => {
-      const td = document.createElement("td");
-
-      if (index === 5 && cell !== "-") {
-        td.innerHTML = `<a href="https://${cell}" target="_blank">${cell}</a>`;
-      } else {
-        td.textContent = cell;
+      function login() {
+        const pass = prompt("Пароль для редагування:");
+        if (pass) {
+          userPassword = pass;
+          document.getElementById("formBlock").style.display = "block";
+          document.getElementById("loginBtn").style.display = "none";
+        }
       }
 
-      tr.appendChild(td);
-    });
+      function handleTypeChange() {
+        const type = document.getElementById("type").value;
+        const membersBlock = document.getElementById("membersBlock");
+        
+        if (type === "соло") {
+          // При виборі "соло" приховуємо поле для кількості учасників
+          membersBlock.style.display = "none";
+        } else {
+          // Якщо обрано інший тип, показуємо поле для кількості учасників
+          membersBlock.style.display = "block";
+        }
+      }
 
-    tableBody.appendChild(tr);
-  });
-}
+      async function loadData() {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+        
+        const tableBody = document.querySelector("#dataTable tbody");
+        tableBody.innerHTML = "";
 
-async function addData() {
-  const password = document.getElementById("password").value;
+        data.slice(1).forEach(row => {
+          const tr = document.createElement("tr");
 
-  const data = {
-    name: document.getElementById("name").value,
-    type: document.getElementById("type").value,
-    status: document.getElementById("status").value,
-    members: document.getElementById("members").value,
-    channel: document.getElementById("channel").value,
-    password: password
-  };
+          row.forEach((cell, index) => {
+            const td = document.createElement("td");
 
-  const response = await fetch(SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify(data)
-  });
+            // Якщо це поле кількості учасників і тип "соло", замінюємо на "-"
+            if (index === 4 && row[2] === "соло") {
+              td.textContent = "-";
+            } else if (index === 5 && cell !== "-") {
+              td.innerHTML = `<a href="https://${cell}" target="_blank">${cell}</a>`;
+            } else {
+              td.textContent = cell;
+            }
 
-  const result = await response.json();
+            tr.appendChild(td);
+          });
 
-  if (result.result === "success") {
-    alert("Додано!");
-    loadData();
-  } else {
-    alert("Невірний пароль");
-  }
-}
+          tableBody.appendChild(tr);
+        });
+      }
 
-loadData();
-</script>
+      async function addData() {
+        // Якщо тип "соло", ставимо "-" для кількості учасників
+        const membersValue = document.getElementById("type").value === "соло" ? "-" : document.getElementById("members").value;
 
-</body>
+        const data = {
+          name: document.getElementById("name").value,
+          type: document.getElementById("type").value,
+          status: document.getElementById("status").value,
+          members: membersValue,
+          channel: document.getElementById("channel").value,
+          password: userPassword
+        };
+
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.result === "success") {
+          alert("Додано!");
+          loadData();
+          // Clear inputs
+          document.getElementById("name").value = "";
+          document.getElementById("type").value = "";
+          document.getElementById("status").value = "";
+          document.getElementById("members").value = "";
+          document.getElementById("channel").value = "";
+        }
+        else {
+          alert("Неправильний пароль або помилка");
+        }
+      }
+
+      loadData();
+    </script>
+
+  </body>
 </html>
