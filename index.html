@@ -176,11 +176,14 @@
           status: document.getElementById("status").value,
           members: membersValue,
           channel: document.getElementById("channel").value,
-          password: password
+          password: password  // Переконайтеся, що пароль передається
         };
 
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify(data)
         });
 
