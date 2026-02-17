@@ -26,7 +26,7 @@ input, select { margin: 5px; }
   
   <!-- Вибір типу зі списку -->
   <label for="type">Тип:</label>
-  <select id="type">
+  <select id="type" onchange="handleTypeChange()">
     <option value="соло">Соло</option>
     <option value="дуо">Дуо</option>
     <option value="тріо">Тріо</option>
@@ -40,8 +40,12 @@ input, select { margin: 5px; }
     <option value="предебют">Предебют</option>
     <option value="активний">Активний</option>
   </select>
+
+  <!-- Кількість учасників, яка буде приховуватися для "соло" -->
+  <div id="membersBlock">
+    <input id="members" placeholder="К-сть учасників">
+  </div>
   
-  <input id="members" placeholder="К-сть учасників">
   <input id="channel" placeholder="Канал">
   <button onclick="addData()">Додати</button>
 </div>
@@ -67,6 +71,19 @@ function login() {
   document.getElementById("formBlock").style.display = "block";
 }
 
+function handleTypeChange() {
+  const type = document.getElementById("type").value;
+  const membersBlock = document.getElementById("membersBlock");
+  
+  if (type === "соло") {
+    // При виборі "соло" приховуємо поле для кількості учасників
+    membersBlock.style.display = "none";
+  } else {
+    // Якщо обрано інший тип, показуємо поле для кількості учасників
+    membersBlock.style.display = "block";
+  }
+}
+
 async function loadData() {
   const response = await fetch(SCRIPT_URL);
   const data = await response.json();
@@ -80,7 +97,10 @@ async function loadData() {
     row.forEach((cell, index) => {
       const td = document.createElement("td");
 
-      if (index === 5 && cell !== "-") {
+      // Якщо це поле кількості учасників і тип "соло", замінюємо на "-"
+      if (index === 4 && row[2] === "соло") {
+        td.textContent = "-";
+      } else if (index === 5 && cell !== "-") {
         td.innerHTML = `<a href="https://${cell}" target="_blank">${cell}</a>`;
       } else {
         td.textContent = cell;
@@ -96,11 +116,14 @@ async function loadData() {
 async function addData() {
   const password = document.getElementById("password").value;
 
+  // Якщо тип "соло", ставимо "-" для кількості учасників
+  const membersValue = document.getElementById("type").value === "соло" ? "-" : document.getElementById("members").value;
+
   const data = {
     name: document.getElementById("name").value,
     type: document.getElementById("type").value,
     status: document.getElementById("status").value,
-    members: document.getElementById("members").value,
+    members: membersValue,
     channel: document.getElementById("channel").value,
     password: password
   };
