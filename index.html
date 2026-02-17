@@ -1,222 +1,109 @@
 <!DOCTYPE html>
 <html lang="uk">
-  <head>
-    <meta charset="UTF-8">
-    <title>Celeba artists</title>
-    <style>
-      body { font-family: Arial; max-width: 1000px; margin: auto; }
-      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-      th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-      #formBlock { display: none; margin-top: 20px; }
-      input, select { margin: 5px; }
-      button { margin-top: 10px; }
-      #loginModal { 
-        display: none; 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%; 
-        background-color: rgba(0, 0, 0, 0.5); 
-        justify-content: center; 
-        align-items: center;
-      }
-      #loginModal .modal-content {
-        background-color: white;
-        padding: 20px;
-        border-radius: 5px;
-        width: 300px;
-      }
-    </style>
-  </head>
-  <body>
+<head>
+<meta charset="UTF-8">
+<title>Celeba artists</title>
+<style>
+body { font-family: Arial; max-width: 1000px; margin: auto; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+#formBlock { display: none; margin-top: 20px; }
+input { margin: 5px; }
+</style>
+</head>
+<body>
 
-    <div class="header">
-      <h2>Celeba artists</h2>
+<h2>Celeba artists</h2>
 
-      <!-- Кнопка для відкриття вікна входу -->
-      <button onclick="openLoginModal()">Увійти</button>
-    </div>
-    
-    <!-- Модальне вікно для введення паролю -->
-    <div id="loginModal">
-      <div class="modal-content">
-        <h3>Введіть пароль</h3>
-        <input type="password" id="password" placeholder="Пароль">
-        <button onclick="login()">Підтвердити</button>
-        <button onclick="closeLoginModal()">Закрити</button>
-      </div>
-    </div>
+<input type="password" id="password" placeholder="Пароль для редагування">
+<button onclick="login()">Увійти</button>
 
-    <!-- Форма для додавання гурту -->
-    <div id="formBlock">
-      <h3>Додати артиста</h3>
-      
-      <input id="name" placeholder="Назва">
-      
-      <label for="type">Тип:</label>
-      <select id="type" onchange="handleTypeChange()">
-        <option value="соло">Соло</option>
-        <option value="дуо">Дуо</option>
-        <option value="тріо">Тріо</option>
-        <option value="гурт">Гурт</option>
-      </select>
+<div id="formBlock">
+  <h3>Додати артиста</h3>
+  <input id="name" placeholder="Назва">
+  <input id="type" placeholder="Тип (гурт/соло)">
+  <input id="status" placeholder="Статус">
+  <input id="members" placeholder="К-сть учасників">
+  <input id="channel" placeholder="Канал">
+  <button onclick="addData()">Додати</button>
+</div>
 
-      <label for="status">Статус:</label>
-      <select id="status">
-        <option value="трейні">Трейні</option>
-        <option value="предебют">Предебют</option>
-        <option value="активний">Активний</option>
-      </select>
+<table id="dataTable">
+<thead>
+<tr>
+<th>Номер</th>
+<th>Назва</th>
+<th>Тип</th>
+<th>Статус</th>
+<th>К-сть учасників</th>
+<th>Канал</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 
-      <div id="membersBlock">
-        <input id="members" placeholder="К-сть учасників">
-      </div>
-      
-      <input id="channel" placeholder="Канал">
-      <button onclick="addData()">Додати</button>
-    </div>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLXB6c_jz0jKVfqPCi7pxL0sYPmnbbIdgJWMpdmu0BsuOWCtpyO-8YEaFa93daD9mw/exec";
 
-    <table id="dataTable">
-    <thead>
-    <tr>
-    <th>Номер</th>
-    <th>Назва</th>
-    <th>Тип</th>
-    <th>Статус</th>
-    <th>К-сть учасників</th>
-    <th>Канал</th>
-    <th>Дія</th> <!-- Для кнопки видалення -->
-    </tr>
-    </thead>
-    <tbody></tbody>
-    </table>
+function login() {
+  document.getElementById("formBlock").style.display = "block";
+}
 
-    <script>
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLXB6c_jz0jKVfqPCi7pxL0sYPmnbbIdgJWMpdmu0BsuOWCtpyO-8YEaFa93daD9mw/exec";
+async function loadData() {
+  const response = await fetch(SCRIPT_URL);
+  const data = await response.json();
+  
+  const tableBody = document.querySelector("#dataTable tbody");
+  tableBody.innerHTML = "";
 
-      // Відкриваємо вікно для введення паролю
-      function openLoginModal() {
-        document.getElementById("loginModal").style.display = "flex";
+  data.slice(1).forEach(row => {
+    const tr = document.createElement("tr");
+
+    row.forEach((cell, index) => {
+      const td = document.createElement("td");
+
+      if (index === 5 && cell !== "-") {
+        td.innerHTML = `<a href="https://${cell}" target="_blank">${cell}</a>`;
+      } else {
+        td.textContent = cell;
       }
 
-      // Закриваємо вікно для введення паролю
-      function closeLoginModal() {
-        document.getElementById("loginModal").style.display = "none";
-      }
+      tr.appendChild(td);
+    });
 
-      // Вхід за паролем
-      function login() {
-        const password = document.getElementById("password").value;
+    tableBody.appendChild(tr);
+  });
+}
 
-        // Перевірка паролю
-        if (password === "celeba123") {
-          document.getElementById("formBlock").style.display = "block";
-          closeLoginModal();
-        } else {
-          alert("Невірний пароль");
-        }
-      }
+async function addData() {
+  const password = document.getElementById("password").value;
 
-      function handleTypeChange() {
-        const type = document.getElementById("type").value;
-        const membersBlock = document.getElementById("membersBlock");
-        
-        if (type === "соло") {
-          membersBlock.style.display = "none";
-        } else {
-          membersBlock.style.display = "block";
-        }
-      }
+  const data = {
+    name: document.getElementById("name").value,
+    type: document.getElementById("type").value,
+    status: document.getElementById("status").value,
+    members: document.getElementById("members").value,
+    channel: document.getElementById("channel").value,
+    password: password
+  };
 
-      async function loadData() {
-        const response = await fetch(SCRIPT_URL);
-        const data = await response.json();
-        
-        const tableBody = document.querySelector("#dataTable tbody");
-        tableBody.innerHTML = "";
+  const response = await fetch(SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
 
-        data.slice(1).forEach((row, index) => {
-          const tr = document.createElement("tr");
+  const result = await response.json();
 
-          row.forEach((cell, index) => {
-            const td = document.createElement("td");
+  if (result.result === "success") {
+    alert("Додано!");
+    loadData();
+  } else {
+    alert("Невірний пароль");
+  }
+}
 
-            // Якщо це поле кількості учасників і тип "соло", замінюємо на "-"
-            if (index === 4 && row[2] === "соло") {
-              td.textContent = "-";
-            } else if (index === 5 && cell !== "-") {
-              td.innerHTML = `<a href="https://${cell}" target="_blank">${cell}</a>`;
-            } else {
-              td.textContent = cell;
-            }
+loadData();
+</script>
 
-            tr.appendChild(td);
-          });
-
-          // Додаємо кнопку для видалення
-          const tdDelete = document.createElement("td");
-          const deleteButton = document.createElement("button");
-          deleteButton.textContent = "Видалити";
-          deleteButton.onclick = () => deleteRow(index + 1); // Додаємо дію видалення
-          tdDelete.appendChild(deleteButton);
-          tr.appendChild(tdDelete);
-
-          tableBody.appendChild(tr);
-        });
-      }
-
-      async function addData() {
-        const password = document.getElementById("password").value;
-        const membersValue = document.getElementById("type").value === "соло" ? "-" : document.getElementById("members").value;
-
-        const data = {
-          name: document.getElementById("name").value,
-          type: document.getElementById("type").value,
-          status: document.getElementById("status").value,
-          members: membersValue,
-          channel: document.getElementById("channel").value,
-          password: password  // Переконайтеся, що пароль передається
-        };
-
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (result.result === "success") {
-          alert("Додано!");
-          loadData();
-        } else {
-          alert("Невірний пароль");
-        }
-      }
-
-      // Видалити рядок
-      async function deleteRow(rowIndex) {
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "delete", rowIndex: rowIndex })
-        });
-
-        const result = await response.json();
-
-        if (result.result === "success") {
-          alert("Рядок видалено!");
-          loadData(); // Перезавантажуємо таблицю після видалення
-        } else {
-          alert("Помилка при видаленні!");
-        }
-      }
-
-      loadData();
-    </script>
-
-  </body>
+</body>
 </html>
-
